@@ -1,20 +1,20 @@
-## Build
-FROM beevelop/ionic AS ionic
-# Create the application directory
+# Use NodeJS base image
+FROM node:13
+# Create app directory
 WORKDIR /usr/src/app
-# Install the application dependencies
-# We can use wildcard to ensure both package.json AND package-lock.json are considered
-# where available (npm@5+)
+# Install app dependencies by copying
+# package.json and package-lock.json
 COPY package*.json ./
-RUN npm ci
-# Bundle app source
+# Install dependencies
+RUN npm install -g @angular/cli
+RUN npm install
+# Install ionic
+RUN npm install -g ionic
+# Copy source
 COPY . .
-
+# Build the project
+RUN ionic build
 # Bind the port that the image will run on
 EXPOSE 8100
-
-RUN ionic build
-## Run
-FROM nginx:alpine
-#COPY www /usr/share/nginx/html
-COPY --from=ionic /usr/src/app/www /usr/share/nginx/html
+# Define the Docker image's behavior at runtime
+CMD ["ng","run","app:serve","--host=0.0.0.0","--port=8100","--disable-host-check"]
